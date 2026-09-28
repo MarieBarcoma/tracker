@@ -9,6 +9,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
+  //text controller
+  final newExpenseNameController = TextEditingController();
+  final newExpenseAmountController = TextEditingController();
+
   //add new expense
    void addNewExpense() {
     showDialog(
@@ -19,14 +23,41 @@ class _HomePageState extends State<HomePage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             //expense name
-            TextField(),
+            TextField(
+              controller: newExpenseNameController,
+            ),
 
             //expense amount
-            TextField(),
+            TextField(
+              controller: newExpenseAmountController,
+            ),
           ],
         ),
+        actions: [
+          //save button
+          MaterialButton(
+            onPressed: save,
+            child: Text('Save'),
+          ),
+
+          //cancel button
+          MaterialButton(
+            onPressed: cancel,
+            child: Text('Cancel'), 
+          ),
+        ] 
       ),
     );
+   }
+
+   //save
+   void save(){
+
+   }
+
+   //cancel
+   void cancel(){
+    
    }
 
   @override
