@@ -1,7 +1,12 @@
+import 'package:expense_tracker/datetime/date_time_helper.dart';
+import 'package:expense_tracker/models/expense_item.dart';
+
 class ExpenseData{
 
   //list of All expenses
   List<ExpenseItem> overallExpenseList = [];
+
+  ExpenseItem? get newExpense => null;
 
   //get expense list
   List<ExpenseItem> getExpenseList(){
@@ -10,7 +15,7 @@ class ExpenseData{
 
   //add expense to list
   void addNewExpense(ExpenseItem expense){
-    overallExpenseList.add(newExpense);
+    overallExpenseList.add(expense);
   }
 
   //delete expense from list
@@ -49,8 +54,8 @@ class ExpenseData{
 
     //go backwards from today to find sunday
     for (int i = 0; i <7; i++){
-      if (getDayName (today.substract(Duration(days: i))) == 'Sun') {
-        startOfWeek = today.substract(Duration(days: i));
+      if (getDayName (today.subtract(Duration(days: i))) == 'Sun') {
+        startOfWeek = today.subtract(Duration(days: i));
       }
     }
     return startOfWeek!;
@@ -95,7 +100,7 @@ class ExpenseData{
 
     for (var expense in overallExpenseList){
       String date = convertDateTimeToString(expense.dateTime);
-      double amount = double.parse(expense.amount);
+      double amount = expense.amount;
 
       if (dailyExpenseSummary.containsKey(date)) {
         double currentAmount = dailyExpenseSummary[date]!;
