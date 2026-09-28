@@ -1,3 +1,5 @@
+
+import 'package:expense_tracker/components/expense_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/data/expense_data.dart';
 import 'package:expense_tracker/models/expense_item.dart';
@@ -97,9 +99,9 @@ class _HomePageState extends State<HomePage> {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: value.getAllExpenseList().length,
-            itemBuilder: (context, index) => ExpenseTitle(
+            itemBuilder: (context, index) => ExpenseTile(
               name: value.getAllExpenseList()[index].name,
-              amount: value.getAllExpenseList()[index].amount,
+              amount: value.getAllExpenseList()[index].amount.toString(),
               dateTime: value.getAllExpenseList()[index].dateTime,
             ), //ExpenseTile
           )
