@@ -89,14 +89,21 @@ class _HomePageState extends State<HomePage> {
           onPressed: addNewExpense,
           child: Icon(Icons.add),
         ),
-        body: ListView.builder(
-          itemCount: value.getAllExpenseList().length,
-          itemBuilder: (context, index) => ListTile(
-            title: Text(value.getAllExpenseList()[index].name),
-            subtitle: Text(value.getAllExpenseList()[index].dateTime.toString()),
-            trailing: Text(value.getAllExpenseList()[index].amount.toString()),
-          ),
-        ),
+        body: ListView(children: [
+          //weekly summary
+
+          //expense List
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: value.getAllExpenseList().length,
+            itemBuilder: (context, index) => ExpenseTitle(
+              name: value.getAllExpenseList()[index].name,
+              amount: value.getAllExpenseList()[index].amount,
+              dateTime: value.getAllExpenseList()[index].dateTime,
+            ), //ExpenseTile
+          )
+        ]),
       ),
     );
   }
