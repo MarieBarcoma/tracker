@@ -11,7 +11,22 @@ class _HomePageState extends State<HomePage> {
 
   //add new expense
    void addNewExpense() {
-    
+    showDialog(
+      context: context, 
+      builder: (context) => AlertDialog(
+        title: Text('Add new expense'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            //expense name
+            TextField(),
+
+            //expense amount
+            TextField(),
+          ],
+        ),
+      ),
+    );
    }
 
   @override
