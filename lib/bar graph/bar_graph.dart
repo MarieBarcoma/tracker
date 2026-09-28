@@ -48,6 +48,7 @@ class MyBarGraph extends StatelessWidget {
           barRods: [
             BarChartRodData(
               toY: data.y,
+              color: Colors.grey[800],
             ),
           ],
         ),
