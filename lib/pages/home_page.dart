@@ -8,9 +8,20 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
+  //add new expense
+   void addNewExpense() {
+    
+   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[300],
+      floatingActionButton: FloatingActionButton(
+        onPressed: addNewExpense,
+        child: Icon(Icons.add),
+      ),
     );
   }
 }
