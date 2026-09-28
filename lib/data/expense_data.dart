@@ -63,9 +63,14 @@ class ExpenseData{
   overallExpenseList =  
   [
 
-  [food, 2026/01/30, $20.0],
-  [drinks, 2026/01/30, $10.0],
-  [food, 2026/02/31, $30.0],
+  [ food, 2026/01/30, $10 ],
+  [ hat, 2026/01/30, $15 ]
+  [ drinks, 2026/01/31, $1 ],
+  [ food, 2026/02/01, $5 ],
+  [ food, 2026/02/01, $6 ],
+  [ food, 2026/02/03, $7 ],
+  [ food, 2026/02/05, $10 ],
+  [ food, 2026/02/05, $11 ],
 
   ]
 
@@ -73,8 +78,12 @@ class ExpenseData{
 
   DailyExpenseSummary = 
   [
-    [2026/01/30: $30.0],
-    [2026/02/31: $30.0],
+    [ 20260130: $25 ],
+    [ 02260131: $1 ],
+    [20260201: $11 ],
+    [20260203: $7 ],
+    [20260205: $21],
+
   ]
 
   */
@@ -83,5 +92,19 @@ class ExpenseData{
     Map<String, double> dailyExpenseSummary = {
       //date (yyyymmdd) : amountTotalForDay
     };
+
+    for (var expense in overallExpenseList){
+      String date = convertDateTimeToString(expense.dateTime);
+      double amount = double.parse(expense.amount);
+
+      if (dailyExpenseSummary.containsKey(date)) {
+        double currentAmount = dailyExpenseSummary[date]!;
+        currentAmount += amount;
+        dailyExpenseSummary[date] = currentAmount;
+      }else {
+        dailyExpenseSummary.addAll({date: amount});
+      }
+    }
+    return dailyExpenseSummary;
   }
 }
