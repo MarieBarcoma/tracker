@@ -97,20 +97,17 @@ class _HomePageState extends State<HomePage> {
     //only save expense if all fields are filled
     if (newExpenseNameController.text.isNotEmpty &&
         newExpenseDollarController.text.isNotEmpty &&
-        newExpenseCentsController.text.isNotEmpty) {  
-      // put dollars and cents together
-    String amount = 
-      '${newExpenseDollarController.text}.${newExpenseCentsController.text}';
-
-    //create expense item
-    ExpenseItem newExpense = ExpenseItem(
-      name: newExpenseNameController.text,
-      amount: double.parse(amount),
-      dateTime: DateTime.now(),
-    );
-    //add the new expense
-    Provider.of<ExpenseData>(context, listen:false)
-        .addNewExpense(newExpense);
+        newExpenseCentsController.text.isNotEmpty) {
+      //put dollars and cents together
+      String amount = 
+          '${newExpenseDollarController.text}.$newExpenseCentsController' ;
+      
+      //create expense item
+      ExpenseItem newExpense = ExpenseItem(
+        name: newExpenseNameController.text, 
+        amount: amount, 
+        dateTime: DateTime.now(),
+      );
   }
   
   Navigator.pop(context);
