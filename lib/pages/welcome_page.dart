@@ -32,7 +32,7 @@ class WelcomePage extends StatelessWidget {
 
               // Title
               const Text(
-                'Marie Expense Tracker',
+                'Marie\nExpense Tracker',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 28,
@@ -66,8 +66,8 @@ class WelcomePage extends StatelessWidget {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF5C73F2),
-                    foregroundColor: Colors.white,
+                    backgroundColor: const Color.fromARGB(255, 219, 55, 159),
+                    foregroundColor: const Color.fromARGB(255, 14, 1, 1),
                     elevation: 4,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(28),

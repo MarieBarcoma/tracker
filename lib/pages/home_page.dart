@@ -3,6 +3,7 @@ import 'package:expense_tracker/components/expense_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/data/expense_data.dart';
 import 'package:expense_tracker/models/expense_item.dart';
+import 'package:expense_tracker/pages/welcome_page.dart'; // Import welcome page
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -26,7 +27,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void addNewExpense() {
-    selectedDate = DateTime.now(); // Reset to today when opening
+    selectedDate = DateTime.now();
 
     showDialog(
       context: context, 
@@ -86,7 +87,6 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
               const SizedBox(height: 14),
-              // Date picker button inside popup (fixed to use onTap)
               InkWell(
                 onTap: () async {
                   DateTime? pickedDate = await showDatePicker(
@@ -163,7 +163,7 @@ class _HomePageState extends State<HomePage> {
       ExpenseItem newExpense = ExpenseItem(
         name: newExpenseNameController.text, 
         amount: double.tryParse(amount) ?? 0.0,
-        dateTime: selectedDate, // Saves the chosen custom date
+        dateTime: selectedDate,
       );
 
       Provider.of<ExpenseData>(context, listen: false).addNewExpense(newExpense);
@@ -200,15 +200,25 @@ class _HomePageState extends State<HomePage> {
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Color(0xFF2D3436)),
-              onPressed: () {},
-            ),
+            automaticallyImplyLeading: false,
             title: const Text(
               'Dashboard',
               style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF2D3436), fontSize: 22),
             ),
             centerTitle: true,
+            actions: [
+              // Exit button redirects back to WelcomePage
+              IconButton(
+                icon: const Icon(Icons.exit_to_app, color: Color(0xFF2D3436)),
+                tooltip: 'Back to Welcome',
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const WelcomePage()),
+                  );
+                },
+              ),
+            ],
           ),
           body: ListView(
             padding: const EdgeInsets.all(16.0),
