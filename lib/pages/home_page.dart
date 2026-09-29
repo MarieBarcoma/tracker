@@ -19,8 +19,17 @@ class _HomePageState extends State<HomePage> {
   final newExpenseDollarController = TextEditingController();
   final newExpenseCentsController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+
+    //prepare data on startup
+    Provider.of<ExpenseData>(context, listen: false).prepareData();
+  }
+
   //add new expense
    void addNewExpense() {
+    TextEditingController? newExpenseAmountController;
     showDialog(
       context: context, 
       builder: (context) => AlertDialog(
@@ -87,7 +96,7 @@ class _HomePageState extends State<HomePage> {
     //create expense item
     ExpenseItem newExpense = ExpenseItem(
       name: newExpenseNameController.text,
-      amount: amount,
+      amount: double.parse(amount),
       dateTime: DateTime.now(),
     ); //ExpenseItem
     //add the new expense

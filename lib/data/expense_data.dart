@@ -12,6 +12,9 @@ class ExpenseData extends ChangeNotifier {
     return overallExpenseList;
   }
 
+  //prepare data to display
+
+
   //add new expense
   void addNewExpense(ExpenseItem newExpense){
     overallExpenseList.add(newExpense);
@@ -115,4 +118,6 @@ class ExpenseData extends ChangeNotifier {
     }
     return dailyExpenseSummary;
   }
+
+  void prepareData() {}
 }
