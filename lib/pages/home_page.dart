@@ -1,4 +1,3 @@
-
 import 'package:expense_tracker/components/expense_summary.dart';
 import 'package:expense_tracker/components/expense_tile.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +13,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  //text controller
+  //text controllers
   final newExpenseNameController = TextEditingController();
   final newExpenseDollarController = TextEditingController();
   final newExpenseCentsController = TextEditingController();
@@ -29,18 +28,17 @@ class _HomePageState extends State<HomePage> {
 
   //add new expense
    void addNewExpense() {
-    TextEditingController? newExpenseAmountController;
     showDialog(
       context: context, 
       builder: (context) => AlertDialog(
-        title: Text('Add new expense'),
+        title: const Text('Add new expense'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            //expense name
+            //expense name (fixed keyboard type to text)
             TextField(
               controller: newExpenseNameController,
-              keyboardType: TextInputType.number,
+              keyboardType: TextInputType.text,
               decoration: const InputDecoration(
                 hintText: "Expense name",
               ),
@@ -52,6 +50,8 @@ class _HomePageState extends State<HomePage> {
                 Expanded(
                   child: TextField(
                     controller: newExpenseDollarController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(hintText: "Dollars"),
                   ),
                 ),
               
@@ -59,14 +59,11 @@ class _HomePageState extends State<HomePage> {
                 Expanded(
                   child: TextField (
                     controller: newExpenseCentsController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(hintText: "Cents"),
                   ),
                 ),
               ],
-            ),
-
-            //expense amount
-            TextField(
-              controller: newExpenseAmountController,
             ),
           ],
         ),
@@ -74,13 +71,13 @@ class _HomePageState extends State<HomePage> {
           //save button
           MaterialButton(
             onPressed: save,
-            child: Text('Save'),
+            child: const Text('Save'),
           ),
 
           //cancel button
           MaterialButton(
             onPressed: cancel,
-            child: Text('Cancel'), 
+            child: const Text('Cancel'), 
           ),
         ] 
       ),
@@ -98,19 +95,22 @@ class _HomePageState extends State<HomePage> {
     if (newExpenseNameController.text.isNotEmpty &&
         newExpenseDollarController.text.isNotEmpty &&
         newExpenseCentsController.text.isNotEmpty) {
-      //put dollars and cents together
-      String amount = 
-          '${newExpenseDollarController.text}.$newExpenseCentsController' ;
       
-      //create expense item
+      // put dollars and cents together properly using .text
+      String amount = '${newExpenseDollarController.text}.${newExpenseCentsController.text}';
+      
+      // create expense item
       ExpenseItem newExpense = ExpenseItem(
         name: newExpenseNameController.text, 
-        amount: amount, 
+        amount: double.tryParse(amount) ?? 0.0,
         dateTime: DateTime.now(),
       );
-  }
+
+      // ADD IT TO THE PROVIDER DATABASE!
+      Provider.of<ExpenseData>(context, listen: false).addNewExpense(newExpense);
+    }
   
-  Navigator.pop(context);
+    Navigator.pop(context);
     clear();
 }
 
@@ -154,7 +154,7 @@ class _HomePageState extends State<HomePage> {
               dateTime: value.getAllExpenseList()[index].dateTime,
               deleteTapped: (p0) => 
                 deleteExpense(value.getAllExpenseList()[index]),
-            ), //ExpenseTile
+            ), 
           )
         ]),
       ),
