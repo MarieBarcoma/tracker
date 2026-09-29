@@ -1,0 +1,49 @@
+import 'package:hive_flutter/hive_flutter.dart';
+import '../models/expense_item.dart';
+
+class HiveDatabase {
+  //reference our box
+  final _myBox = Hive.box("expense_database");
+
+  //write data
+  void saveData(List<ExpenseItem> allExpense) {
+
+    /*
+    Hive can only store strings and dateTime, and not custom objects like ExpenseItem
+    So lets convert ExpenseItem objects into types that can be stored in our db
+
+    allExpense =
+    [
+      ExpenseItem ( name/ amunt / dateTime )
+      ..
+    ]
+
+    ->
+
+    [
+    
+    [ name, amount, dateTime ],
+    ..
+
+    ]
+
+    */
+
+    List<List<dynamic>> allExpensesFormatted = [];
+
+    for (var expense in allExpense) {
+      //convert each expenseItem into a list of storable types (strings, dateTime)
+      List<dynamic> expenseFormatted = [
+        expense.name,
+        expense.amount,
+        expense.dateTime,
+      ];
+      allExpensesFormatted.add(expenseFormatted);
+    }
+
+    //finally lets store in our database!
+    _myBox.put("ALL_EXPENSES", allExpensesFormatted);
+  }
+
+  //read data
+}
