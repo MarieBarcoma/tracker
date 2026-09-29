@@ -85,6 +85,10 @@ class HiveDatabase {
         amount: amount, 
         dateTime: dateTime,
       );
-    } 
+
+      //add expense to overall list of expenses
+      allExpenses.add(expense);
+    }
+    return allExpenses; 
   }
 }
