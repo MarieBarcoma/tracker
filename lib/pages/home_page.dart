@@ -16,6 +16,8 @@ class _HomePageState extends State<HomePage> {
   final newExpenseNameController = TextEditingController();
   final newExpenseDollarController = TextEditingController();
   final newExpenseCentsController = TextEditingController();
+  
+  DateTime selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -24,81 +26,125 @@ class _HomePageState extends State<HomePage> {
   }
 
   void addNewExpense() {
+    selectedDate = DateTime.now(); // Reset to today when opening
+
     showDialog(
       context: context, 
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Row(
-          children: const [
-            Icon(Icons.account_balance_wallet, color: Color(0xFF6C63FF)),
-            SizedBox(width: 8),
-            Text('Add New Expense', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: newExpenseNameController,
-              decoration: InputDecoration(
-                hintText: "e.g., Groceries, Coffee",
-                prefixIcon: const Icon(Icons.edit, color: Colors.grey),
-                filled: true,
-                fillColor: Colors.grey[100],
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setStateDialog) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          title: Row(
+            children: const [
+              Icon(Icons.account_balance_wallet, color: Color(0xFF5C73F2)),
+              SizedBox(width: 8),
+              Text('Add Expense', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: newExpenseNameController,
+                decoration: InputDecoration(
+                  hintText: "Category (e.g., Food)",
+                  prefixIcon: const Icon(Icons.category, color: Colors.grey),
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                ),
               ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: newExpenseDollarController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        hintText: "Dollars",
+                        prefixIcon: const Icon(Icons.attach_money, color: Colors.grey),
+                        filled: true,
+                        fillColor: Colors.grey[100],
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: newExpenseCentsController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        hintText: "Cents",
+                        prefixIcon: const Icon(Icons.monetization_on, color: Colors.grey),
+                        filled: true,
+                        fillColor: Colors.grey[100],
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              // Date picker button inside popup (fixed to use onTap)
+              InkWell(
+                onTap: () async {
+                  DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: selectedDate,
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime(2030),
+                  );
+                  if (pickedDate != null) {
+                    setStateDialog(() {
+                      selectedDate = pickedDate;
+                    });
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.calendar_today, color: Colors.grey, size: 20),
+                          const SizedBox(width: 10),
+                          Text(
+                            "${selectedDate.day} / ${selectedDate.month} / ${selectedDate.year}",
+                            style: const TextStyle(fontWeight: FontWeight.w500, color: Color(0xFF2D3436)),
+                          ),
+                        ],
+                      ),
+                      const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: cancel,
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
             ),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: newExpenseDollarController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      hintText: "Dollars",
-                      prefixIcon: const Icon(Icons.attach_money, color: Colors.grey),
-                      filled: true,
-                      fillColor: Colors.grey[100],
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextField(
-                    controller: newExpenseCentsController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      hintText: "Cents",
-                      prefixIcon: const Icon(Icons.monetization_on, color: Colors.grey),
-                      filled: true,
-                      fillColor: Colors.grey[100],
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                    ),
-                  ),
-                ),
-              ],
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF5C73F2),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+              onPressed: save,
+              child: const Text('Add', style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: cancel,
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6C63FF),
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            ),
-            onPressed: save,
-            child: const Text('Save Expense', style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
-        ],
       ),
     );
   }
@@ -117,7 +163,7 @@ class _HomePageState extends State<HomePage> {
       ExpenseItem newExpense = ExpenseItem(
         name: newExpenseNameController.text, 
         amount: double.tryParse(amount) ?? 0.0,
-        dateTime: DateTime.now(),
+        dateTime: selectedDate, // Saves the chosen custom date
       );
 
       Provider.of<ExpenseData>(context, listen: false).addNewExpense(newExpense);
@@ -141,127 +187,214 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Consumer<ExpenseData>(
-      builder: (context, value, child) => Scaffold(
-        backgroundColor: const Color(0xFFF8F9FA),
-        appBar: AppBar(
-          title: Row(
-            children: const [
-              Text('PocketWallet', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 22)),
-              SizedBox(width: 8),
-              Icon(Icons.bolt, color: Colors.amberAccent),
+      builder: (context, value, child) {
+        double totalBalance = value.getAllExpenseList().fold(0.0, (sum, item) => sum + item.amount);
+        
+        Map<String, double> categoryTotals = {};
+        for (var item in value.getAllExpenseList()) {
+          categoryTotals.update(item.name, (sum) => sum + item.amount, ifAbsent: () => item.amount);
+        }
+
+        return Scaffold(
+          backgroundColor: const Color(0xFFF8F9FA),
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Color(0xFF2D3436)),
+              onPressed: () {},
+            ),
+            title: const Text(
+              'Dashboard',
+              style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF2D3436), fontSize: 22),
+            ),
+            centerTitle: true,
+          ),
+          body: ListView(
+            padding: const EdgeInsets.all(16.0),
+            children: [
+              // Top Balance Card
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF5C73F2),
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF5C73F2).withValues(alpha: 0.3),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Total Balance',
+                      style: TextStyle(color: Colors.white70, fontSize: 15, fontWeight: FontWeight.w500),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '\$${totalBalance.toStringAsFixed(2)}', 
+                      style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Spending Report (Bar Graph)
+              const Text(
+                'Spending Report',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF2D3436)),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.all(12),
+                child: ExpenseSummary(startOfWeek: value.startOfWeekDate()),
+              ),
+
+              const SizedBox(height: 25),
+
+              // Expense by Category Graph
+              const Text(
+                'Expense by Category',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF2D3436)),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.all(20),
+                child: categoryTotals.isEmpty
+                    ? const Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 20.0),
+                          child: Text('No category data available', style: TextStyle(color: Colors.grey)),
+                        ),
+                      )
+                    : Column(
+                        children: categoryTotals.entries.map((entry) {
+                          double percentage = totalBalance > 0 ? (entry.value / totalBalance) : 0.0;
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 14.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(entry.key, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF2D3436))),
+                                    Text('\$${entry.value.toStringAsFixed(2)} (${(percentage * 100).toStringAsFixed(0)}%)', 
+                                      style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: LinearProgressIndicator(
+                                    value: percentage,
+                                    backgroundColor: Colors.grey[100],
+                                    color: const Color(0xFF5C73F2),
+                                    minHeight: 10,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+              ),
+
+              const SizedBox(height: 25),
+
+              // Add Expense Action Button
+              SizedBox(
+                width: double.infinity,
+                height: 54,
+                child: ElevatedButton(
+                  onPressed: addNewExpense,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF5C73F2),
+                    foregroundColor: Colors.white,
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                  ),
+                  child: const Text(
+                    '+ Add Expense',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 25),
+
+              // Recent Transactions List
+              const Text(
+                'Recent Transactions',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF2D3436)),
+              ),
+              const SizedBox(height: 12),
+
+              value.getAllExpenseList().isEmpty
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20.0),
+                      child: Center(
+                        child: Text('No transactions yet', style: TextStyle(color: Colors.grey[500], fontSize: 15)),
+                      ),
+                    )
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: value.getAllExpenseList().length,
+                      itemBuilder: (context, index) => Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.03),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: ExpenseTile(
+                          name: value.getAllExpenseList()[index].name,
+                          amount: value.getAllExpenseList()[index].amount.toStringAsFixed(2),
+                          dateTime: value.getAllExpenseList()[index].dateTime,
+                          deleteTapped: (p0) => 
+                            deleteExpense(value.getAllExpenseList()[index]),
+                        ),
+                      ),
+                    ),
             ],
           ),
-          flexibleSpace: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF6C63FF), Color(0xFF4834DF)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-          ),
-          elevation: 0,
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: addNewExpense,
-          backgroundColor: const Color(0xFF4834DF),
-          elevation: 4,
-          icon: const Icon(Icons.add_rounded, color: Colors.white),
-          label: const Text('Add Expense', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        ),
-        body: ListView(
-          padding: const EdgeInsets.all(16.0),
-          children: [
-            // Colorful Gradient Summary Card Container
-            Container(
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Colors.white, Color(0xFFF1F2F6)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: Colors.deepPurple.withValues(alpha: 0.08)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.deepPurple.withValues(alpha: 0.06),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.all(16),
-              child: ExpenseSummary(startOfWeek: value.startOfWeekDate()),
-            ),
-
-            const SizedBox(height: 25),
-
-            // Section Header with item count badge
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Recent Transactions',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF2D3436)),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF6C63FF).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    '${value.getAllExpenseList().length} items',
-                    style: const TextStyle(color: Color(0xFF6C63FF), fontWeight: FontWeight.bold, fontSize: 12),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // Expense List
-            value.getAllExpenseList().isEmpty
-                ? Padding(
-                    padding: const EdgeInsets.only(top: 40.0),
-                    child: Center(
-                      child: Column(
-                        children: [
-                          Icon(Icons.receipt_long_rounded, size: 60, color: Colors.grey[400]),
-                          const SizedBox(height: 10),
-                          Text('No expenses added yet!', style: TextStyle(color: Colors.grey[600], fontSize: 16)),
-                        ],
-                      ),
-                    ),
-                  )
-                : ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: value.getAllExpenseList().length,
-                    itemBuilder: (context, index) => Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.03),
-                            blurRadius: 8,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: ExpenseTile(
-                        name: value.getAllExpenseList()[index].name,
-                        amount: value.getAllExpenseList()[index].amount.toStringAsFixed(2),
-                        dateTime: value.getAllExpenseList()[index].dateTime,
-                        deleteTapped: (p0) => 
-                          deleteExpense(value.getAllExpenseList()[index]),
-                      ),
-                    ),
-                  )
-          ],
-        ),
-      ),
+        );
+      },
     );
   }
 }
