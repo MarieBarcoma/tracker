@@ -3,7 +3,8 @@ import 'package:expense_tracker/components/expense_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/data/expense_data.dart';
 import 'package:expense_tracker/models/expense_item.dart';
-import 'package:expense_tracker/pages/welcome_page.dart'; // Import welcome page
+import 'package:expense_tracker/pages/welcome_page.dart';
+import 'package:expense_tracker/pages/statistics_page.dart'; // Import statistics page
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -207,6 +208,17 @@ class _HomePageState extends State<HomePage> {
             ),
             centerTitle: true,
             actions: [
+              // Statistics page button
+              IconButton(
+                icon: const Icon(Icons.bar_chart_rounded, color: Color(0xFF2D3436)),
+                tooltip: 'Statistics',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const StatisticsPage()),
+                  );
+                },
+              ),
               // Exit button redirects back to WelcomePage
               IconButton(
                 icon: const Icon(Icons.exit_to_app, color: Color(0xFF2D3436)),
@@ -273,7 +285,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(16),
                 child: ExpenseSummary(startOfWeek: value.startOfWeekDate()),
               ),
 
