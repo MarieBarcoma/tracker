@@ -76,9 +76,15 @@ class HiveDatabase {
     for (int i = 0; i < savedExpenses.length; i++) {
       //collect individual expense data
       String name = savedExpenses[i][0];
-      String amount = savedExpenses[i][1];
+      double amount = (savedExpenses[i][1] as num).toDouble();
       DateTime dateTime = savedExpenses[i][2];
 
+      //create expense item
+      ExpenseItem expense = ExpenseItem(
+        name: name, 
+        amount: amount, 
+        dateTime: dateTime,
+      );
     } 
   }
 }
