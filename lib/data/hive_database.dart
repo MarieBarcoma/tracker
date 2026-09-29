@@ -46,4 +46,39 @@ class HiveDatabase {
   }
 
   //read data
+  List<ExpenseItem> readData() {
+    /*
+
+    Data is stored in Hive as a list of strings + dateTime
+    so lets convert our saved data into ExpenseItem objects
+
+    savedData = 
+
+    [
+    [ name, amount, dateTime ],
+    ..
+
+    ]
+
+    ->
+
+    [
+    ExpenseItem ( name / amount / dateTime ),
+    ..
+
+    ]
+
+    */
+
+    List savedExpenses = _myBox.get("ALL_EXPENSES") ?? [];
+    List<ExpenseItem> allExpenses = [];
+
+    for (int i = 0; i < savedExpenses.length; i++) {
+      //collect individual expense data
+      String name = savedExpenses[i][0];
+      String amount = savedExpenses[i][1];
+      DateTime dateTime = savedExpenses[i][2];
+
+    } 
+  }
 }
