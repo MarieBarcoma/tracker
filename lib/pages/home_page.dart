@@ -1,4 +1,3 @@
-import 'package:expense_tracker/components/expense_summary.dart';
 import 'package:expense_tracker/components/expense_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/data/expense_data.dart';
@@ -187,23 +186,35 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Array of vibrant colors for each day of the week
+    final List<Color> barColors = [
+      const Color(0xFFFF7675), // Sun - Soft Red/Coral
+      const Color(0xFF74B9FF), // Mon - Soft Blue
+      const Color(0xFF55EFC4), // Tue - Mint Green
+      const Color(0xFFFFEAA7), // Wed - Soft Yellow
+      const Color(0xFFA29BFE), // Thu - Lavender Purple
+      const Color(0xFFFAB1A0), // Fri - Peach
+      const Color(0xFF81ECEC), // Sat - Turquoise
+    ];
+
     return Consumer<ExpenseData>(
       builder: (context, value, child) {
         double totalBalance = value.getAllExpenseList().fold(0.0, (sum, item) => sum + item.amount);
-        
+
+        Map<String, double> dailySummary = value.calculateDailyExpenseSummary();
         DateTime startOfWeek = value.startOfWeekDate();
-        DateTime endOfWeek = startOfWeek.add(const Duration(days: 7));
 
-        var currentWeekExpenses = value.getAllExpenseList().where((item) {
-          return item.dateTime.isAfter(startOfWeek.subtract(const Duration(seconds: 1))) &&
-                 item.dateTime.isBefore(endOfWeek);
-        }).toList();
-
-        double currentWeekTotal = currentWeekExpenses.fold(0.0, (sum, item) => sum + item.amount);
-
-        Map<String, double> categoryTotals = {};
-        for (var item in currentWeekExpenses) {
-          categoryTotals.update(item.name, (sum) => sum + item.amount, ifAbsent: () => item.amount);
+        List<double> dailyExpenses = [];
+        List<String> dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        
+        double maxDayExpense = 10.0;
+        for (int i = 0; i < 7; i++) {
+          DateTime d = startOfWeek.add(Duration(days: i));
+          String formattedKey = "${d.year}${d.month.toString().padLeft(2, '0')}${d.day.toString().padLeft(2, '0')}";
+          
+          double amt = dailySummary[formattedKey] ?? 0.0;
+          dailyExpenses.add(amt);
+          if (amt > maxDayExpense) maxDayExpense = amt;
         }
 
         return Scaffold(
@@ -249,7 +260,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const SizedBox(height: 20),
 
-                // Styled Credit Card Balance Box matching reference[cite: 8]
+                // Styled Credit Card Balance Box
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
@@ -283,7 +294,6 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ],
                           ),
-                          // Three dots options icon
                           Container(
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
@@ -295,7 +305,6 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                       const SizedBox(height: 24),
-                      // Progress bar tracker inside card
                       ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: LinearProgressIndicator(
@@ -306,7 +315,6 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      // Card details bottom row (Card numbers + Mastercard)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -314,7 +322,6 @@ class _HomePageState extends State<HomePage> {
                             '* * * *    * * * *    4 0 2',
                             style: TextStyle(color: Colors.white70, fontSize: 13, letterSpacing: 2),
                           ),
-                          // Mastercard overlapping circles logo
                           Row(
                             children: [
                               Container(
@@ -345,133 +352,59 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const SizedBox(height: 25),
 
-                // Transactions / Summary status cards row matching reference[cite: 8]
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 6, offset: const Offset(0, 2)),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF00B894).withValues(alpha: 0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(Icons.arrow_upward, color: Color(0xFF00B894), size: 18),
-                            ),
-                            const SizedBox(width: 12),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const [
-                                Text('+24%', style: TextStyle(color: Color(0xFF00B894), fontWeight: FontWeight.bold, fontSize: 14)),
-                                SizedBox(height: 2),
-                                Text('Income', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 15),
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 6, offset: const Offset(0, 2)),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFF7675).withValues(alpha: 0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(Icons.arrow_downward, color: Color(0xFFFF7675), size: 18),
-                            ),
-                            const SizedBox(width: 12),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const [
-                                Text('-42%', style: TextStyle(color: Color(0xFFFF7675), fontWeight: FontWeight.bold, fontSize: 14)),
-                                SizedBox(height: 2),
-                                Text('Expense', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 25),
-
-                // Expense by Category Graph (Current Week Only)
+                // Weekly Colorful Bar Graph Dashboard Section
                 const Text(
-                  'Expense by Category (This Week)',
+                  'Weekly Expense Summary',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF141518)),
                 ),
                 const SizedBox(height: 12),
                 Container(
+                  height: 200,
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
-                      BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4)),
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.03),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
                     ],
                   ),
-                  padding: const EdgeInsets.all(20),
-                  child: categoryTotals.isEmpty
-                      ? const Center(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 20.0),
-                            child: Text('No weekly category data available', style: TextStyle(color: Colors.grey)),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: List.generate(7, (index) {
+                      double val = dailyExpenses[index];
+                      double heightFactor = (maxDayExpense > 0) ? (val / (maxDayExpense * 1.2)) : 0.0;
+                      if (heightFactor > 1.0) heightFactor = 1.0;
+
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            val > 0 ? '\$${val.toStringAsFixed(0)}' : '',
+                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey),
                           ),
-                        )
-                      : Column(
-                          children: categoryTotals.entries.map((entry) {
-                            double percentage = currentWeekTotal > 0 ? (entry.value / currentWeekTotal) : 0.0;
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 14.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(entry.key, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF141518))),
-                                      Text('\$${entry.value.toStringAsFixed(2)} (${(percentage * 100).toStringAsFixed(0)}%)', 
-                                        style: TextStyle(color: Colors.grey[600], fontSize: 13)),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 6),
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: LinearProgressIndicator(
-                                      value: percentage,
-                                      backgroundColor: Colors.grey[100],
-                                      color: const Color(0xFF141518),
-                                      minHeight: 10,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }).toList(),
-                        ),
+                          const SizedBox(height: 4),
+                          Container(
+                            width: 14,
+                            height: 100 * heightFactor + 10, 
+                            decoration: BoxDecoration(
+                              color: val > 0 ? barColors[index] : Colors.grey[200],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            dayLabels[index],
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+                          ),
+                        ],
+                      );
+                    }),
+                  ),
                 ),
 
                 const SizedBox(height: 25),
@@ -546,7 +479,7 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-          // Bottom Navigation Bar matching reference[cite: 8]
+          // Bottom Navigation Bar
           bottomNavigationBar: Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
             decoration: BoxDecoration(
@@ -566,7 +499,6 @@ class _HomePageState extends State<HomePage> {
                   icon: const Icon(Icons.account_balance_wallet_outlined, color: Colors.grey, size: 26),
                   onPressed: () {},
                 ),
-                // Floating Action Center Plus Button
                 GestureDetector(
                   onTap: addNewExpense,
                   child: Container(
