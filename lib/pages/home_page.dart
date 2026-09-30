@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:expense_tracker/data/expense_data.dart';
 import 'package:expense_tracker/models/expense_item.dart';
 import 'package:expense_tracker/pages/welcome_page.dart';
-import 'package:expense_tracker/pages/statistics_page.dart'; // Import statistics page
+import 'package:expense_tracker/pages/statistics_page.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -189,10 +189,23 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Consumer<ExpenseData>(
       builder: (context, value, child) {
+        // Grand Total balance of all-time expenses
         double totalBalance = value.getAllExpenseList().fold(0.0, (sum, item) => sum + item.amount);
         
+        // Filter expenses strictly for the CURRENT WEEK
+        DateTime startOfWeek = value.startOfWeekDate();
+        DateTime endOfWeek = startOfWeek.add(const Duration(days: 7));
+
+        var currentWeekExpenses = value.getAllExpenseList().where((item) {
+          return item.dateTime.isAfter(startOfWeek.subtract(const Duration(seconds: 1))) &&
+                 item.dateTime.isBefore(endOfWeek);
+        }).toList();
+
+        double currentWeekTotal = currentWeekExpenses.fold(0.0, (sum, item) => sum + item.amount);
+
+        // Category totals specifically for the current week
         Map<String, double> categoryTotals = {};
-        for (var item in value.getAllExpenseList()) {
+        for (var item in currentWeekExpenses) {
           categoryTotals.update(item.name, (sum) => sum + item.amount, ifAbsent: () => item.amount);
         }
 
@@ -291,9 +304,9 @@ class _HomePageState extends State<HomePage> {
 
               const SizedBox(height: 25),
 
-              // Expense by Category Graph
+              // Expense by Category Graph (Current Week Only)
               const Text(
-                'Expense by Category',
+                'Expense by Category (This Week)',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF2D3436)),
               ),
               const SizedBox(height: 12),
@@ -314,12 +327,12 @@ class _HomePageState extends State<HomePage> {
                     ? const Center(
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 20.0),
-                          child: Text('No category data available', style: TextStyle(color: Colors.grey)),
+                          child: Text('No weekly category data available', style: TextStyle(color: Colors.grey)),
                         ),
                       )
                     : Column(
                         children: categoryTotals.entries.map((entry) {
-                          double percentage = totalBalance > 0 ? (entry.value / totalBalance) : 0.0;
+                          double percentage = currentWeekTotal > 0 ? (entry.value / currentWeekTotal) : 0.0;
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 14.0),
                             child: Column(

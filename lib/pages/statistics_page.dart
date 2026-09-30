@@ -11,25 +11,49 @@ class StatisticsPage extends StatefulWidget {
 }
 
 class _StatisticsPageState extends State<StatisticsPage> {
-  String selectedMonth = 'March'; // Default month filter from reference
+  // Default to September
+  String selectedMonth = 'September'; 
+
+  // Map month names to their corresponding calendar numbers (1-12)
+  final Map<String, int> monthMap = {
+    'January': 1,
+    'February': 2,
+    'March': 3,
+    'April': 4,
+    'May': 5,
+    'June': 6,
+    'July': 7,
+    'August': 8,
+    'September': 9,
+    'October': 10,
+    'November': 11,
+    'December': 12,
+  };
 
   @override
   Widget build(BuildContext context) {
     return Consumer<ExpenseData>(
       builder: (context, value, child) {
-        // Calculate category totals dynamically from your provider data
+        int targetMonthNumber = monthMap[selectedMonth] ?? 9;
+
+        // Filter transactions for the selected month
+        var filteredExpenses = value.getAllExpenseList().where((item) {
+          return item.dateTime.month == targetMonthNumber;
+        }).toList();
+
+        // Calculate category totals for the pie chart
         Map<String, double> categoryTotals = {};
-        for (var item in value.getAllExpenseList()) {
+        for (var item in filteredExpenses) {
           categoryTotals.update(item.name, (sum) => sum + item.amount, ifAbsent: () => item.amount);
         }
 
-        double totalBalance = categoryTotals.values.fold(0.0, (sum, amt) => sum + amt);
+        double monthTotalBalance = categoryTotals.values.fold(0.0, (sum, amt) => sum + amt);
 
-        // Define a list of colors for the pie chart slices
+        // Define distinct colors for the pie chart slices
         final List<Color> pieColors = [
           const Color(0xFF5C73F2), // Blue
           const Color(0xFFFF7675), // Coral/Red
-          const Color(0xFFFFEaa7), // Yellow/Orange
+          const Color(0xFFFFEAA7), // Yellow/Orange
           const Color(0xFF00B894), // Teal
           const Color(0xFFA29BFE), // Purple
         ];
@@ -84,7 +108,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                       child: DropdownButton<String>(
                         value: selectedMonth,
                         icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF2D3436)),
-                        items: ['January', 'February', 'March', 'April', 'May', 'June']
+                        items: monthMap.keys
                             .map((month) => DropdownMenuItem(
                                   value: month,
                                   child: Text(month, style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF2D3436))),
@@ -104,9 +128,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
                 const SizedBox(height: 30),
 
                 // Expense by Category Card with Pie Chart
-                const Text(
-                  'Expense by Category',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF2D3436)),
+                Text(
+                  'Expense by Category ($selectedMonth)',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF2D3436)),
                 ),
                 const SizedBox(height: 12),
                 Container(
@@ -123,10 +147,10 @@ class _StatisticsPageState extends State<StatisticsPage> {
                     ],
                   ),
                   child: categoryTotals.isEmpty
-                      ? const SizedBox(
+                      ? SizedBox(
                           height: 200,
                           child: Center(
-                            child: Text('No data available for pie chart', style: TextStyle(color: Colors.grey)),
+                            child: Text('No data available for $selectedMonth', style: const TextStyle(color: Colors.grey)),
                           ),
                         )
                       : SizedBox(
@@ -136,7 +160,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                               sectionsSpace: 2,
                               centerSpaceRadius: 40,
                               sections: categoryTotals.entries.map((entry) {
-                                final double percentage = totalBalance > 0 ? (entry.value / totalBalance) * 100 : 0.0;
+                                final double percentage = monthTotalBalance > 0 ? (entry.value / monthTotalBalance) * 100 : 0.0;
                                 final Color currentColor = pieColors[colorIndex % pieColors.length];
                                 colorIndex++;
 
@@ -158,77 +182,108 @@ class _StatisticsPageState extends State<StatisticsPage> {
                 ),
                 const SizedBox(height: 30),
 
-                // Weekly Progress Section (matching the reference layout)
-                const Text(
-                  'Weekly Progress',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF2D3436)),
+                // Monthly Recorded Data Section
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '$selectedMonth Transactions',
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF2D3436)),
+                    ),
+                    Text(
+                      'Total: \$${monthTotalBalance.toStringAsFixed(2)}',
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF5C73F2)),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
+                
+                filteredExpenses.isEmpty
+                    ? Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'No expenses recorded for $selectedMonth',
+                            style: const TextStyle(color: Colors.grey, fontSize: 14),
+                          ),
+                        ),
+                      )
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: filteredExpenses.length,
+                        itemBuilder: (context, index) {
+                          final expense = filteredExpenses[index];
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.02),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF5C73F2).withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: const Icon(Icons.receipt_long, color: Color(0xFF5C73F2), size: 20),
+                                    ),
+                                    const SizedBox(width: 14),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          expense.name,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15,
+                                            color: Color(0xFF2D3436),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '${expense.dateTime.day} / ${expense.dateTime.month} / ${expense.dateTime.year}',
+                                          style: const TextStyle(color: Colors.grey, fontSize: 12),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                Text(
+                                  '\$${expense.amount.toStringAsFixed(2)}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                    color: Color(0xFF2D3436),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      // Sub-bars layout or summary tracker
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          _buildProgressColumn('Drink Water', 0.8, const Color(0xFF55E6C1)),
-                          _buildProgressColumn('Exercise', 0.6, const Color(0xFF786FA6)),
-                          _buildProgressColumn('Read', 0.4, const Color(0xFFF8A5C2)),
-                          _buildProgressColumn('Savings', 0.3, const Color(0xFFF3a683)),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
           ),
         );
       },
-    );
-  }
-
-  // Helper widget for weekly progress individual bars
-  Widget _buildProgressColumn(String label, double progress, Color color) {
-    return Column(
-      children: [
-        Container(
-          width: 24,
-          height: 120,
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(12),
-          ),
-          alignment: Alignment.bottomCenter,
-          child: FractionallySizedBox(
-            heightFactor: progress,
-            child: Container(
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.grey),
-        ),
-      ],
     );
   }
 }
